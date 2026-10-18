@@ -11,14 +11,27 @@ jobs:
         variant:
         - before
         - after
+        mode:
+        - untraced
+        - traced
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Runner hardware
       run: nproc; free -g | head -2; lscpu | grep -E 'Model name|Thread|Core|Socket'
+    - name: Build (untraced, timed)
+      if: matrix.mode == 'untraced'
+      shell: bash
+      run: '# As ci.yml''s test-ubuntu-latest job.
+
+        if [ "${{ matrix.variant }}" = after ]; then J=-j$(getconf _NPROCESSORS_ONLN); fi
+
+        make $J REDIS_CFLAGS=''-Werror'' BUILD_TLS=yes
+
+        '
     - uses: LalitMaganti/buildprof@v0.2.8
       with:
-        artifact-name: redis-${{ matrix.variant }}
+        artifact-name: redis-${{ matrix.variant }}-${{ matrix.mode }}
         command: '# As ci.yml''s test-ubuntu-latest job.
 
           if [ "${{ matrix.variant }}" = after ]; then J=-j$(getconf _NPROCESSORS_ONLN); fi
@@ -26,3 +39,4 @@ jobs:
           make $J REDIS_CFLAGS=''-Werror'' BUILD_TLS=yes
 
           '
+      if: matrix.mode == 'traced'
