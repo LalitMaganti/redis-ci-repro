@@ -13,7 +13,7 @@ jobs:
         - after
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: LalitMaganti/buildprof@v0.2.8
       with:
         artifact-name: redis-${{ matrix.variant }}
